@@ -40,7 +40,8 @@ class LoginFragment : Fragment() {
                     .addOnCompleteListener { task ->
                         if (task.isSuccessful) {
                             Toast.makeText(context, "Login Successful!", Toast.LENGTH_SHORT).show()
-                            // Navigate to HomeFragment or another screen
+                            // Navigate to HomeFragment
+                            findNavController().navigate(R.id.action_loginFragment_to_homeFragment)
                         } else {
                             Toast.makeText(
                                 context,

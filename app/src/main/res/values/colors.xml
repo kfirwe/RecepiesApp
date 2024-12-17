@@ -5,4 +5,6 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="purple_500">#6200EE</color>
+    <color name="brown">#964B00</color>
+    <color name="logoColor">#c0a484</color>
 </resources>

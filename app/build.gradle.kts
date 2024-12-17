@@ -51,6 +51,12 @@ dependencies {
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-auth-ktx")
 
+    implementation("com.google.android.material:material:1.10.0") // For TabLayout and Bottom Navigation
+    implementation("androidx.recyclerview:recyclerview:1.3.2")    // RecyclerView
+    implementation("com.squareup.picasso:picasso:2.71828")        // For Image Loading
+    implementation("com.github.bumptech.glide:glide:4.15.1")
+    annotationProcessor("com.github.bumptech.glide:compiler:4.15.1")
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
