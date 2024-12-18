@@ -35,19 +35,19 @@ class UserRecipesFragment : Fragment() {
         // Initialize mock recipes
         recipes = mutableListOf(
             Recipe(
-                id = "1",
+                id = 1,
                 title = "Spaghetti Bolognese",
                 description = "Classic Italian pasta dish with rich meat sauce.",
                 imageUrl = "https://via.placeholder.com/300" // Placeholder URL
             ),
             Recipe(
-                id = "2",
+                id = 2,
                 title = "Vegan Salad",
                 description = "Healthy and fresh vegan salad with avocado and quinoa.",
                 imageUrl = "https://via.placeholder.com/300"
             ),
             Recipe(
-                id = "3",
+                id = 3,
                 title = "Chocolate Cake",
                 description = "Delicious chocolate cake topped with creamy frosting.",
                 imageUrl = "https://via.placeholder.com/300"
