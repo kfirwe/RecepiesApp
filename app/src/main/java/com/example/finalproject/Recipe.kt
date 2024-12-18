@@ -3,8 +3,12 @@ package com.example.finalproject
 import com.google.gson.annotations.SerializedName
 
 data class RecipeResponse(
-    val results: List<Recipe>
+    val results: List<Recipe>?,
+    val offset: Int,
+    val number: Int,
+    val totalResults: Int
 )
+
 
 data class Recipe(
     val id: Int,
