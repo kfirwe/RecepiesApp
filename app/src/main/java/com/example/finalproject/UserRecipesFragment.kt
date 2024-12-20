@@ -54,11 +54,19 @@ class UserRecipesFragment : Fragment() {
             )
         )
 
-
-        // Initialize adapter and set it to RecyclerView
-        adapter = RecipeAdapter(recipes)
+        // Initialize adapter with click listener
+        adapter = RecipeAdapter(recipes) { recipe ->
+            // Handle recipe click for user recipes
+            showUserRecipeDialog(recipe)
+        }
         recyclerView.adapter = adapter
         recyclerView.adapter?.notifyDataSetChanged()
+    }
 
+    private fun showUserRecipeDialog(recipe: Recipe) {
+        // Show a popup dialog or perform any other action for user recipes
+        val message = "User Recipe Clicked: ${recipe.title}"
+        Log.d("UserRecipesFragment", message)
     }
 }
+

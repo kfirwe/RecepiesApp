@@ -9,6 +9,30 @@ data class RecipeResponse(
     val totalResults: Int
 )
 
+data class IngredientResponse(
+    val ingredients: List<Ingredient>
+)
+
+data class Ingredient(
+    val name: String,
+    val amount: Amount,
+    val image: String
+)
+
+data class Amount(
+    val metric: Metric,
+    val us: US
+)
+
+data class Metric(
+    val value: Double,
+    val unit: String
+)
+
+data class US(
+    val value: Double,
+    val unit: String
+)
 
 data class Recipe(
     val id: Int,
