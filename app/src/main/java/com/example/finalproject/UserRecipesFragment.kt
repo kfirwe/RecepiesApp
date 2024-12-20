@@ -38,18 +38,21 @@ class UserRecipesFragment : Fragment() {
                 id = 1,
                 title = "Spaghetti Bolognese",
                 description = "Classic Italian pasta dish with rich meat sauce.",
+                userId = "XOdrNjUsXshSLILNdWVjyu8LXqp2",
                 imageUrl = "https://via.placeholder.com/300" // Placeholder URL
             ),
             Recipe(
                 id = 2,
                 title = "Vegan Salad",
                 description = "Healthy and fresh vegan salad with avocado and quinoa.",
+                userId = "XOdrNjUsXshSLILNdWVjyu8LXqp2",
                 imageUrl = "https://via.placeholder.com/300"
             ),
             Recipe(
                 id = 3,
                 title = "Chocolate Cake",
                 description = "Delicious chocolate cake topped with creamy frosting.",
+                userId = "XOdrNjUsXshSLILNdWVjyu8LXqp2",
                 imageUrl = "https://via.placeholder.com/300"
             )
         )

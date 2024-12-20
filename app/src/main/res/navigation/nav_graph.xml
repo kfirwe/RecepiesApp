@@ -35,4 +35,19 @@
         android:name="com.example.finalproject.HomeFragment"
         android:label="HomeFragment"
         tools:layout="@layout/fragment_home" />
+
+    <!-- Add Recipes Fragment -->
+    <fragment
+        android:id="@+id/addRecipeFragment"
+        android:name="com.example.finalproject.AddRecipeFragment"
+        android:label="Add Recipe"
+        tools:layout="@layout/fragment_add_recipe" />
+
+    <!-- Profile Fragment -->
+    <fragment
+        android:id="@+id/ProfileFragment"
+        android:name="com.example.finalproject.ProfileFragment"
+        android:label="Profile"
+        tools:layout="@layout/fragment_profile" />
+
 </navigation>

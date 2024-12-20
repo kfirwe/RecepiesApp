@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.tabs.TabLayout
@@ -26,8 +27,8 @@ class HomeFragment : Fragment() {
 
         // Setup ViewPager2 with tabs
         val adapter = ViewPagerAdapter(this)
-        adapter.addFragment(GlobalRecipesFragment(), "Global Recipes")
         adapter.addFragment(UserRecipesFragment(), "User Recipes")
+        adapter.addFragment(GlobalRecipesFragment(), "Global Recipes")
 
         viewPager.adapter = adapter
 
@@ -43,7 +44,7 @@ class HomeFragment : Fragment() {
         bottomNavigationView.setOnItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.nav_home -> {
-                    Toast.makeText(context, "Already on Home", Toast.LENGTH_SHORT).show()
+                    // Already on profile, do nothing
                     true
                 }
                 R.id.nav_search -> {
@@ -51,11 +52,11 @@ class HomeFragment : Fragment() {
                     true
                 }
                 R.id.nav_profile -> {
-                    Toast.makeText(context, "Profile coming soon!", Toast.LENGTH_SHORT).show()
+                    findNavController().navigate(R.id.ProfileFragment)
                     true
                 }
                 R.id.nav_add -> {
-                    Toast.makeText(context, "Adding coming soon!", Toast.LENGTH_SHORT).show()
+                    findNavController().navigate(R.id.addRecipeFragment)
                     true
                 }
                 else -> false

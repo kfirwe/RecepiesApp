@@ -78,7 +78,7 @@ class GlobalRecipesFragment : Fragment() {
             try {
                 val response = RetrofitClient.apiService.getIngredients(
                     recipeId = recipe.id,
-                    apiKey = "018e269aad9f4e319ae2e37e383ec814"
+                    apiKey = "258d00a753374df19678d9210db10b17"
                 )
                 withContext(Dispatchers.Main) {
                     val ingredientsText = response.ingredients.joinToString("\n") {
@@ -107,7 +107,7 @@ class GlobalRecipesFragment : Fragment() {
                     query = "",
                     number = pageSize,
                     offset = offset,
-                    apiKey = "018e269aad9f4e319ae2e37e383ec814"
+                    apiKey = "258d00a753374df19678d9210db10b17"
                 )
 
                 if (offset >= response.totalResults) {
