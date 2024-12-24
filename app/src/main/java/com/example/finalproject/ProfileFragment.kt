@@ -1,10 +1,11 @@
 package com.example.finalproject
 
-
 import android.app.Activity
 import android.app.AlertDialog
-import android.app.ProgressDialog // Add this for ProgressDialog
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.util.Base64
 import android.os.Bundle
 import android.provider.MediaStore
 import android.view.LayoutInflater
@@ -18,6 +19,12 @@ import com.bumptech.glide.Glide
 import com.example.finalproject.databinding.FragmentProfileBinding
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.ByteArrayOutputStream
 
 class ProfileFragment : Fragment() {
 
@@ -41,7 +48,7 @@ class ProfileFragment : Fragment() {
 
         // Initialize loading dialog
         loadingDialog = AlertDialog.Builder(requireContext())
-            .setView(R.layout.loading_spinner) // Create a layout file for a spinner
+            .setView(R.layout.loading_spinner)
             .setCancelable(false)
             .create()
 
@@ -151,11 +158,12 @@ class ProfileFragment : Fragment() {
             userProfile?.let {
                 binding.etDisplayName.setText(it.displayName ?: "")
                 binding.etBio.setText(it.bio ?: "")
-                it.profilePictureUrl?.let { imageUrl ->
-                    Glide.with(this)
-                        .load(imageUrl)
-                        .placeholder(R.drawable.ic_placeholder_image)
-                        .into(binding.ivProfilePicture)
+
+                it.profilePictureBase64?.let { base64Image ->
+                    val imageBytes = Base64.decode(base64Image, Base64.DEFAULT)
+                    val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
+
+                    binding.ivProfilePicture.setImageBitmap(bitmap)
                 }
             }
             profileFetched = true

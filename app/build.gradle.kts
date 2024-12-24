@@ -1,4 +1,3 @@
-
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -6,7 +5,6 @@ plugins {
     id("com.google.gms.google-services")
     id("kotlin-kapt")
 }
-
 
 android {
     namespace = "com.example.finalproject"
@@ -24,7 +22,7 @@ android {
 
     buildFeatures {
         dataBinding = true
-        viewBinding = true // Use the new syntax
+        viewBinding = true // Enables view binding
     }
 
     buildTypes {
@@ -45,43 +43,40 @@ android {
     kotlinOptions {
         jvmTarget = "11"
     }
-
 }
 
 dependencies {
-    // Use Firebase BOM to manage Firebase dependencies
+    // Firebase BOM and dependencies
     implementation(platform("com.google.firebase:firebase-bom:32.1.1"))
-
-    // Firebase dependencies (version managed by BOM)
     implementation("com.google.firebase:firebase-firestore")
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-auth-ktx")
     implementation("com.google.firebase:firebase-storage-ktx")
 
-    // Retrofit and related dependencies
+    // Retrofit dependencies
     implementation("com.squareup.okhttp3:logging-interceptor:4.10.0")
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
 
+    // Room Database
+    implementation("androidx.room:room-runtime:2.5.2")
+    kapt("androidx.room:room-compiler:2.5.2")
+    implementation("androidx.room:room-ktx:2.5.2") // For suspend functions
+
     // UI Components
-    implementation("com.google.android.material:material:1.10.0") // For TabLayout and Bottom Navigation
-    implementation("androidx.recyclerview:recyclerview:1.3.2")    // RecyclerView
+    implementation("com.google.android.material:material:1.12.0")
+    implementation("androidx.recyclerview:recyclerview:1.3.2")
 
     // Image Loading
     implementation("com.github.bumptech.glide:glide:4.15.1")
     annotationProcessor("com.github.bumptech.glide:compiler:4.15.1")
-    implementation("com.squareup.picasso:picasso:2.71828") // Optional
+    implementation("com.squareup.picasso:picasso:2.71828")
 
     // AndroidX Libraries
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.appcompat)
-    implementation(libs.material)
-    implementation(libs.androidx.activity)
-    implementation(libs.androidx.constraintlayout)
-
-    // Room Database
-    implementation(libs.room.runtime)
-    kapt(libs.room.compiler)
+    implementation("androidx.core:core-ktx:1.15.0")
+    implementation("androidx.appcompat:appcompat:1.7.0")
+    implementation("androidx.activity:activity:1.9.3")
+    implementation("androidx.constraintlayout:constraintlayout:2.2.0")
 
     // Navigation Components
     implementation("androidx.navigation:navigation-fragment-ktx:2.8.5")
@@ -91,4 +86,3 @@ dependencies {
 kapt {
     correctErrorTypes = true
 }
-

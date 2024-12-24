@@ -1,9 +1,11 @@
 package com.example.finalproject
 
 import android.app.Activity
-import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
+import android.util.Base64
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,8 +14,9 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.storage.FirebaseStorage
+import java.io.ByteArrayOutputStream
 import java.util.*
 
 class AddRecipeFragment : Fragment() {
@@ -26,7 +29,6 @@ class AddRecipeFragment : Fragment() {
     private var selectedImageUri: Uri? = null
 
     private val firestore by lazy { FirebaseFirestore.getInstance() }
-    private val storage by lazy { FirebaseStorage.getInstance() }
 
     private val imagePickerLauncher =
         registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
@@ -60,10 +62,7 @@ class AddRecipeFragment : Fragment() {
                     findNavController().navigate(R.id.ProfileFragment)
                     true
                 }
-                R.id.nav_add -> {
-                    // Already on profile, do nothing
-                    true
-                }
+                R.id.nav_add -> true
                 else -> false
             }
         }
@@ -94,31 +93,43 @@ class AddRecipeFragment : Fragment() {
             return
         }
 
-        val recipeId = UUID.randomUUID().toString()
-        val storageRef = storage.reference.child("recipes/$recipeId.jpg")
+        try {
+            // Convert image to Base64
+            val inputStream = requireContext().contentResolver.openInputStream(selectedImageUri!!)
+            val bitmap = BitmapFactory.decodeStream(inputStream)
+            inputStream?.close()
 
-        storageRef.putFile(selectedImageUri!!)
-            .addOnSuccessListener { taskSnapshot ->
-                storageRef.downloadUrl.addOnSuccessListener { imageUrl ->
-                    val recipeData = hashMapOf(
-                        "title" to title,
-                        "description" to description,
-                        "imageUrl" to imageUrl.toString(),
-                        "comments" to emptyList<Map<String, Any>>() // Empty comments list
-                    )
-                    firestore.collection("recipes")
-                        .document(recipeId)
-                        .set(recipeData)
-                        .addOnSuccessListener {
-                            Toast.makeText(context, "Recipe uploaded successfully!", Toast.LENGTH_SHORT).show()
-                        }
-                        .addOnFailureListener {
-                            Toast.makeText(context, "Failed to upload recipe.", Toast.LENGTH_SHORT).show()
-                        }
+            val byteArrayOutputStream = ByteArrayOutputStream()
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream)
+            val imageBytes = byteArrayOutputStream.toByteArray()
+            val base64Image = Base64.encodeToString(imageBytes, Base64.DEFAULT)
+
+            // Create recipe data
+            val recipeId = UUID.randomUUID().toString()
+            val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
+            val recipeData = hashMapOf(
+                "id" to recipeId,
+                "title" to title,
+                "description" to description,
+                "imageBase64" to base64Image,
+                "userId" to userId,
+                "comments" to emptyList<Map<String, Any>>() // Empty comments list
+            )
+
+            // Save to Firestore
+            firestore.collection("recipes")
+                .document(recipeId)
+                .set(recipeData)
+                .addOnSuccessListener {
+                    Toast.makeText(context, "Recipe uploaded successfully!", Toast.LENGTH_SHORT).show()
+                    findNavController().navigate(R.id.homeFragment)
                 }
-            }
-            .addOnFailureListener {
-                Toast.makeText(context, "Failed to upload image.", Toast.LENGTH_SHORT).show()
-            }
+                .addOnFailureListener {
+                    Toast.makeText(context, "Failed to upload recipe.", Toast.LENGTH_SHORT).show()
+                }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Toast.makeText(context, "Failed to process image.", Toast.LENGTH_SHORT).show()
+        }
     }
 }

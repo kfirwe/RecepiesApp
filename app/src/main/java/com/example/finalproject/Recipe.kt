@@ -3,7 +3,7 @@ package com.example.finalproject
 import com.google.gson.annotations.SerializedName
 
 data class RecipeResponse(
-    val results: List<Recipe>?,
+    val results: List<GlobalRecipe>?,
     val offset: Int,
     val number: Int,
     val totalResults: Int
@@ -37,11 +37,25 @@ data class US(
 data class UserProfile(
     val displayName: String? = null,
     val bio: String? = null,
-    val profilePictureUrl: String? = null
+    val profilePictureBase64: String? = null // Updated to store the image as a Base64 string
 )
 
 
 data class Recipe(
+    val id: String = "",               // Default empty string
+    val title: String = "",            // Default empty string
+    val userId: String = "",           // Default empty string
+    val description: String? = null,   // Nullable with default null
+    val imageBase64: String? = null,   // Nullable with default null
+    val comments: List<Map<String, Any>> = emptyList() // Default empty list
+) {
+    // No-argument constructor for Firestore
+    constructor() : this("", "", "", null, null, emptyList())
+}
+
+
+
+data class GlobalRecipe(
     val id: Int,
     val title: String,
     val userId : String,       // User ID who uploaded the recipe

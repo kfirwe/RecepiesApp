@@ -20,8 +20,8 @@ import android.widget.TextView
 
 class GlobalRecipesFragment : Fragment() {
     private lateinit var recyclerView: RecyclerView
-    private lateinit var adapter: RecipeAdapter
-    private val recipes = mutableListOf<Recipe>()
+    private lateinit var adapter: RecipeGlobalAdapter
+    private val recipes = mutableListOf<GlobalRecipe>()
     private var offset = 0
     private val pageSize = 10
     private var isLoading = false
@@ -34,7 +34,7 @@ class GlobalRecipesFragment : Fragment() {
         recyclerView = view.findViewById(R.id.recyclerView)
         recyclerView.layoutManager = LinearLayoutManager(context)
 
-        adapter = RecipeAdapter(recipes) { recipe ->
+        adapter = RecipeGlobalAdapter(recipes) { recipe ->
             showRecipeDialog(recipe) // Handle recipe click
         }
         recyclerView.adapter = adapter
@@ -56,7 +56,7 @@ class GlobalRecipesFragment : Fragment() {
         return view
     }
 
-    private fun showRecipeDialog(recipe: Recipe) {
+    private fun showRecipeDialog(recipe: GlobalRecipe) {
         val dialog = Dialog(requireContext())
         dialog.setContentView(R.layout.dialog_global_recipe)
 
@@ -77,7 +77,7 @@ class GlobalRecipesFragment : Fragment() {
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 val response = RetrofitClient.apiService.getIngredients(
-                    recipeId = recipe.id,
+                    recipeId = recipe.id.toInt(),
                     apiKey = "258d00a753374df19678d9210db10b17"
                 )
                 withContext(Dispatchers.Main) {
@@ -116,7 +116,15 @@ class GlobalRecipesFragment : Fragment() {
 
                 withContext(Dispatchers.Main) {
                     response.results?.let {
-                        recipes.addAll(it)
+                        recipes.addAll(it.map { recipe ->
+                            GlobalRecipe(
+                                id = recipe.id,
+                                title = recipe.title,
+                                userId = recipe.userId,
+                                description = recipe.description ?: "",
+                                imageUrl = recipe.imageUrl ?: ""
+                            )
+                        })
                         adapter.notifyDataSetChanged()
                         offset += pageSize
                     }

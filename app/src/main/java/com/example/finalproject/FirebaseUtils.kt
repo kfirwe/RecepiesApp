@@ -1,6 +1,8 @@
 package com.example.finalproject
 
 
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
 import com.example.finalproject.Recipe
 import com.google.firebase.auth.FirebaseAuth
@@ -8,14 +10,13 @@ import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.ktx.userProfileChangeRequest
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
-import com.google.firebase.storage.FirebaseStorage
-import com.google.firebase.storage.StorageReference
+import android.util.Base64
+import java.io.ByteArrayOutputStream
 
 object FirebaseUtils {
 
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
     private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
-    private val storage: FirebaseStorage = FirebaseStorage.getInstance()
 
     // Fetch Current User
     fun getCurrentUser(): FirebaseUser? = auth.currentUser
@@ -54,26 +55,40 @@ object FirebaseUtils {
     }
 
     // Upload Profile Picture
+    // Upload Profile Picture as PNG (Base64) to Firestore
     fun uploadProfilePicture(imageUri: Uri, callback: (Boolean) -> Unit) {
         val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return callback(false)
-        val profileRef = FirebaseStorage.getInstance().reference.child("profile_pictures/$userId.jpg")
 
-        profileRef.putFile(imageUri)
-            .addOnSuccessListener {
-                profileRef.downloadUrl.addOnSuccessListener { uri ->
-                    val profileUpdates = userProfileChangeRequest {
-                        photoUri = uri
-                    }
-                    FirebaseAuth.getInstance().currentUser?.updateProfile(profileUpdates)
-                        ?.addOnCompleteListener { task ->
-                            callback(task.isSuccessful)
-                        }
+        try {
+            // Open input stream from the provided URI
+            val inputStream = FirebaseAuth.getInstance().app.applicationContext.contentResolver.openInputStream(imageUri)
+            val bitmap = BitmapFactory.decodeStream(inputStream)
+            inputStream?.close()
+
+            // Convert Bitmap to Base64 (ensure it's PNG)
+            val byteArrayOutputStream = ByteArrayOutputStream()
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream) // Ensure PNG format
+            val imageBytes = byteArrayOutputStream.toByteArray()
+            val base64Image = Base64.encodeToString(imageBytes, Base64.DEFAULT)
+
+            // Save Base64 string to Firestore
+            val firestore = FirebaseFirestore.getInstance()
+            val userDoc = firestore.collection("users").document(userId)
+            val profileUpdates = mapOf("profilePictureBase64" to base64Image)
+
+            userDoc.update(profileUpdates)
+                .addOnCompleteListener { task ->
+                    callback(task.isSuccessful)
                 }
-            }
-            .addOnFailureListener {
-                callback(false)
-            }
+                .addOnFailureListener {
+                    callback(false)
+                }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            callback(false)
+        }
     }
+
 
 
     // Fetch Uploaded Recipes
@@ -85,10 +100,7 @@ object FirebaseUtils {
             .get()
             .addOnSuccessListener { querySnapshot ->
                 val recipes = querySnapshot.documents.mapNotNull { document ->
-                    val id = document.id.toIntOrNull() // Convert to Int or return null
-                    id?.let {
-                        document.toObject(Recipe::class.java)?.copy(id = it)
-                    }
+                    document.toObject(Recipe::class.java)?.copy(id = document.id) // Use document ID as the recipe ID
                 }
 
                 callback(recipes)
@@ -97,6 +109,7 @@ object FirebaseUtils {
                 callback(emptyList())
             }
     }
+
 
 
     // Add Recipe to Firestore
@@ -134,12 +147,12 @@ object FirebaseUtils {
                 val bio = documentSnapshot.getString("bio")
                 val email = documentSnapshot.getString("email")
                 val createdAt = documentSnapshot.getLong("createdAt")
-                val profilePictureUrl = documentSnapshot.getString("profilePictureUrl") // Optional, if exists
+                val profilePictureBase64 = documentSnapshot.getString("profilePictureBase64") // Optional, if exists
 
                 val userProfile = UserProfile(
                     displayName = name,
                     bio = bio,
-                    profilePictureUrl = profilePictureUrl
+                    profilePictureBase64 = profilePictureBase64
                 )
                 callback(userProfile)
             }
