@@ -1,6 +1,7 @@
 package com.example.finalproject
 
 import com.google.gson.annotations.SerializedName
+import com.google.firebase.Timestamp
 
 data class RecipeResponse(
     val results: List<GlobalRecipe>?,
@@ -53,7 +54,13 @@ data class Recipe(
     constructor() : this("", "", "", null, null, emptyList())
 }
 
-
+data class Comment(
+    val userName: String = "",
+    val commentText: String = "",
+    val rating: Int = 0,
+    val timestamp: Timestamp = Timestamp.now(), // Firestore Timestamp
+    val id: String = "" // Unique comment ID for updates/deletes
+)
 
 data class GlobalRecipe(
     val id: Int,
