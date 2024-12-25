@@ -31,7 +31,7 @@ class ProfileFragment : Fragment() {
 
     private lateinit var binding: FragmentProfileBinding
     private val uploadedRecipes = mutableListOf<Recipe>()
-    private lateinit var adapter: RecipeAdapter
+    private lateinit var adapter: RecipeAdapterForProfile
     private val PICK_IMAGE_REQUEST = 1
 
     // Loading Dialog
@@ -64,9 +64,14 @@ class ProfileFragment : Fragment() {
 
         // Initialize RecyclerView
         binding.recyclerViewUploadedRecipes.layoutManager = LinearLayoutManager(context)
-        adapter = RecipeAdapter(uploadedRecipes, onRecipeClick = { recipe ->
-            Toast.makeText(context, "Edit Recipe: ${recipe.title}", Toast.LENGTH_SHORT).show()
-        })
+
+        // Use RecipeAdapterForProfile
+        adapter = RecipeAdapterForProfile(
+            recipes = uploadedRecipes,
+            onEditClick = ::onEditRecipe,  // Link edit function
+            onDeleteClick = ::onDeleteRecipe,  // Link delete function
+            onChatClick = ::onChatRecipe  // Link chat function
+        )
         binding.recyclerViewUploadedRecipes.adapter = adapter
 
         // Add divider decoration to the RecyclerView
@@ -81,6 +86,7 @@ class ProfileFragment : Fragment() {
 
         setupButtons()
     }
+
 
     private fun setupBottomNavigation() {
         val bottomNavigationView = binding.root.findViewById<BottomNavigationView>(R.id.bottom_navigation)
@@ -211,6 +217,72 @@ class ProfileFragment : Fragment() {
             }
         }
     }
+
+    private fun onEditRecipe(recipe: Recipe) {
+        val editDialog = EditRecipeDialogFragment().apply {
+            arguments = Bundle().apply {
+                putString("recipeId", recipe.id)
+                putString("title", recipe.title)
+                putString("description", recipe.description)
+                putString("imageBase64", recipe.imageBase64)
+            }
+        }
+
+        editDialog.setOnRecipeUpdatedListener(object : EditRecipeDialogFragment.OnRecipeUpdatedListener {
+            override fun onRecipeUpdated(
+                recipeId: String,
+                updatedTitle: String,
+                updatedDescription: String,
+                updatedImageBase64: String?
+            ) {
+                // Update the recipe in the list
+                val index = uploadedRecipes.indexOfFirst { it.id == recipeId }
+                if (index != -1) {
+                    val updatedRecipe = uploadedRecipes[index].copy(
+                        title = updatedTitle,
+                        description = updatedDescription,
+                        imageBase64 = updatedImageBase64 // Update the imageBase64
+                    )
+                    uploadedRecipes[index] = updatedRecipe
+                    adapter.notifyItemChanged(index) // Refresh the specific item
+                }
+            }
+        })
+
+        editDialog.show(parentFragmentManager, "EditRecipeDialogFragment")
+    }
+
+
+
+    private fun onDeleteRecipe(recipe: Recipe) {
+        AlertDialog.Builder(requireContext())
+            .setTitle("Delete Recipe")
+            .setMessage("Are you sure you want to delete this recipe? This action cannot be undone.")
+            .setPositiveButton("Delete") { _, _ ->
+                FirebaseUtils.deleteRecipe(recipe.id) { success ->
+                    if (success) {
+                        uploadedRecipes.remove(recipe)
+                        adapter.notifyDataSetChanged()
+                        Toast.makeText(context, "Recipe deleted successfully", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(context, "Failed to delete recipe", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
+    private fun onChatRecipe(recipe: Recipe) {
+        val chatDialog = CommentsDialogFragment().apply {
+            arguments = Bundle().apply {
+                putString("recipeId", recipe.id)
+                putBoolean("isOwner", true) // Allow deleting other comments if owner
+            }
+        }
+        chatDialog.show(parentFragmentManager, "CommentsDialogFragment")
+    }
+
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)

@@ -139,7 +139,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:scrollbars="vertical"
-                        tools:listitem="@layout/item_recipe" />
+                        tools:listitem="@layout/item_recepie_profile" />
                 </androidx.core.widget.NestedScrollView>
 
             </LinearLayout>
