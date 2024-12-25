@@ -9,7 +9,7 @@
         <!-- Curved Background at the Top -->
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="50dp"
+            android:layout_height="wrap_content"
             android:background="@drawable/background_top_curve">
 
             <!-- Title Text -->
@@ -32,18 +32,15 @@
                 android:drawableLeft="@drawable/ic_logout"
                 android:drawablePadding="8dp"
                 android:layout_alignParentEnd="true"
-                android:layout_marginEnd="16dp" />
-
-
-
+                android:layout_marginEnd="16dp"
+                android:text="Logout" />
         </RelativeLayout>
 
-
+        <!-- Scrollable Content -->
         <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="605dp"
-            android:layout_marginTop="50dp"
-            tools:ignore="MissingConstraints">
+            android:layout_height="match_parent"
+            android:layout_marginTop="50dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -51,81 +48,99 @@
                 android:orientation="vertical"
                 android:padding="30dp">
 
+                <!-- Profile Picture Section -->
                 <ImageView
                     android:id="@+id/ivProfilePicture"
-                    android:layout_width="80dp"
-                    android:layout_height="80dp"
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
                     android:layout_gravity="center"
-                    android:src="@drawable/ic_placeholder_image" />
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/ic_placeholder_image"
+                    android:layout_marginBottom="8dp" />
 
                 <Button
                     android:id="@+id/btnChangeProfilePicture"
                     android:layout_width="wrap_content"
-                    android:layout_height="35dp"
+                    android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:text="Change Profile Picture"
-                    android:textSize="12sp" />
+                    android:textSize="14sp"
+                    android:layout_marginBottom="16dp" />
 
+                <!-- Display Name -->
                 <EditText
                     android:id="@+id/etDisplayName"
                     android:layout_width="match_parent"
-                    android:layout_height="35dp"
-                    android:layout_marginTop="12dp"
+                    android:layout_height="wrap_content"
                     android:hint="Display Name"
-                    android:textSize="12sp" />
+                    android:textSize="14sp"
+                    android:layout_marginBottom="8dp" />
 
                 <Button
                     android:id="@+id/btnUpdateDisplayName"
                     android:layout_width="match_parent"
-                    android:layout_height="35dp"
-                    android:layout_marginTop="6dp"
+                    android:layout_height="wrap_content"
                     android:text="Update Display Name"
-                    android:textSize="12sp" />
+                    android:textSize="14sp"
+                    android:layout_marginBottom="16dp" />
 
+                <!-- Bio -->
                 <EditText
                     android:id="@+id/etBio"
                     android:layout_width="match_parent"
-                    android:layout_height="35dp"
-                    android:layout_marginTop="12dp"
+                    android:layout_height="wrap_content"
                     android:hint="Bio"
-                    android:textSize="12sp" />
+                    android:textSize="14sp"
+                    android:layout_marginBottom="8dp" />
 
                 <Button
                     android:id="@+id/btnUpdateBio"
                     android:layout_width="match_parent"
-                    android:layout_height="35dp"
-                    android:layout_marginTop="6dp"
+                    android:layout_height="wrap_content"
                     android:text="Update Bio"
-                    android:textSize="12sp" />
+                    android:textSize="14sp"
+                    android:layout_marginBottom="16dp" />
 
+                <!-- Password -->
                 <EditText
                     android:id="@+id/etPassword"
                     android:layout_width="match_parent"
-                    android:layout_height="35dp"
-                    android:layout_marginTop="12dp"
+                    android:layout_height="wrap_content"
                     android:hint="Password"
-                    android:textSize="12sp" />
+                    android:textSize="14sp"
+                    android:layout_marginBottom="8dp"
+                    android:inputType="textPassword" />
 
                 <Button
                     android:id="@+id/btnUpdatePassword"
                     android:layout_width="match_parent"
-                    android:layout_height="35dp"
-                    android:layout_marginTop="6dp"
+                    android:layout_height="wrap_content"
                     android:text="Update Password"
-                    android:textSize="12sp" />
+                    android:textSize="14sp"
+                    android:layout_marginBottom="16dp" />
 
+                <!-- Uploaded Recipes Section -->
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
                     android:text="Uploaded Recipes"
-                    android:textSize="16sp"
-                    android:textStyle="bold" />
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="8dp" />
 
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/recyclerViewUploadedRecipes"
+                <!-- Scrollable Recipes List -->
+                <androidx.core.widget.NestedScrollView
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="350dp"
+                    android:fillViewport="true">
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/recyclerViewUploadedRecipes"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:scrollbars="vertical"
+                        tools:listitem="@layout/item_recipe" />
+                </androidx.core.widget.NestedScrollView>
 
             </LinearLayout>
         </ScrollView>

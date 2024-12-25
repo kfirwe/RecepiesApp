@@ -34,6 +34,8 @@ class AddRecipeFragment : Fragment() {
         registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
             uri?.let {
                 selectedImageUri = it
+                // Display the selected image
+                selectedImageView.visibility = View.VISIBLE
                 selectedImageView.setImageURI(uri)
             }
         }
@@ -44,10 +46,16 @@ class AddRecipeFragment : Fragment() {
     ): View? {
         val view = inflater.inflate(R.layout.fragment_add_recipe, container, false)
 
-        // Ensure the correct tab is selected in the BottomNavigationView
+        // Initialize views
+        titleEditText = view.findViewById(R.id.etTitle)
+        descriptionEditText = view.findViewById(R.id.etDescription)
+        selectImageButton = view.findViewById(R.id.btnSelectImage)
+        uploadButton = view.findViewById(R.id.btnUpload)
+        selectedImageView = view.findViewById(R.id.ivSelectedImage)
+
+        // Set up bottom navigation
         val bottomNavigationView = view.findViewById<BottomNavigationView>(R.id.bottom_navigation)
         bottomNavigationView.selectedItemId = R.id.nav_add
-
         bottomNavigationView.setOnItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.nav_home -> {
@@ -67,16 +75,12 @@ class AddRecipeFragment : Fragment() {
             }
         }
 
-        titleEditText = view.findViewById(R.id.etTitle)
-        descriptionEditText = view.findViewById(R.id.etDescription)
-        selectImageButton = view.findViewById(R.id.btnSelectImage)
-        uploadButton = view.findViewById(R.id.btnUpload)
-        selectedImageView = view.findViewById(R.id.ivSelectedImage)
-
+        // Set up image picker
         selectImageButton.setOnClickListener {
             imagePickerLauncher.launch("image/*")
         }
 
+        // Set up upload button
         uploadButton.setOnClickListener {
             uploadRecipe()
         }
