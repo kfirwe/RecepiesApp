@@ -50,4 +50,11 @@
         android:label="Profile"
         tools:layout="@layout/fragment_profile" />
 
+    <!-- Search Fragment -->
+    <fragment
+        android:id="@+id/SearchFragment"
+        android:name="com.example.finalproject.SearchRecipeFragment"
+        android:label="Search"
+        tools:layout="@layout/fragment_search_recipe" />
+
 </navigation>

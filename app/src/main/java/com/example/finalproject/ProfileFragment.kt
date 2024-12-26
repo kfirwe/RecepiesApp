@@ -99,7 +99,7 @@ class ProfileFragment : Fragment() {
                     true
                 }
                 R.id.nav_search -> {
-                    Toast.makeText(context, "Search coming soon!", Toast.LENGTH_SHORT).show()
+                    findNavController().navigate(R.id.SearchFragment)
                     true
                 }
                 R.id.nav_add -> {
