@@ -1,8 +1,8 @@
 package com.example.finalproject.api
 
 
-import com.example.finalproject.IngredientResponse
-import com.example.finalproject.RecipeResponse
+import com.example.finalproject.data.models.IngredientResponse
+import com.example.finalproject.data.models.RecipeResponse
 import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Path

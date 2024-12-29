@@ -7,7 +7,7 @@
     <!-- Login Fragment -->
     <fragment
         android:id="@+id/loginFragment"
-        android:name="com.example.finalproject.LoginFragment"
+        android:name="com.example.finalproject.ui.fragments.LoginFragment"
         android:label="LoginFragment"
         tools:layout="@layout/fragment_login">
         <action
@@ -21,7 +21,7 @@
     <!-- SignUp Fragment -->
     <fragment
         android:id="@+id/signUpFragment"
-        android:name="com.example.finalproject.SignUpFragment"
+        android:name="com.example.finalproject.ui.fragments.SignUpFragment"
         android:label="SignUpFragment"
         tools:layout="@layout/fragment_sign_up">
         <action
@@ -32,28 +32,28 @@
     <!-- Home Fragment -->
     <fragment
         android:id="@+id/homeFragment"
-        android:name="com.example.finalproject.HomeFragment"
+        android:name="com.example.finalproject.ui.fragments.HomeFragment"
         android:label="HomeFragment"
         tools:layout="@layout/fragment_home" />
 
     <!-- Add Recipes Fragment -->
     <fragment
         android:id="@+id/addRecipeFragment"
-        android:name="com.example.finalproject.AddRecipeFragment"
+        android:name="com.example.finalproject.ui.fragments.AddRecipeFragment"
         android:label="Add Recipe"
         tools:layout="@layout/fragment_add_recipe" />
 
     <!-- Profile Fragment -->
     <fragment
         android:id="@+id/ProfileFragment"
-        android:name="com.example.finalproject.ProfileFragment"
+        android:name="com.example.finalproject.ui.fragments.ProfileFragment"
         android:label="Profile"
         tools:layout="@layout/fragment_profile" />
 
     <!-- Search Fragment -->
     <fragment
         android:id="@+id/SearchFragment"
-        android:name="com.example.finalproject.SearchRecipeFragment"
+        android:name="com.example.finalproject.ui.fragments.SearchRecipeFragment"
         android:label="Search"
         tools:layout="@layout/fragment_search_recipe" />
 
