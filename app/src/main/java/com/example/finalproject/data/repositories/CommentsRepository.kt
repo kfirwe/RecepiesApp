@@ -24,6 +24,15 @@ class CommentsRepository {
         }
     }
 
+    suspend fun fetchUserNameById(userId: String): String? {
+        return try {
+            val document = firestore.collection("users").document(userId).get().await()
+            document.getString("name")
+        } catch (e: Exception) {
+            null
+        }
+    }
+
     suspend fun addComment(recipeId: String, comment: Comment) {
         try {
             firestore.collection("recipes").document(recipeId).collection("comments")

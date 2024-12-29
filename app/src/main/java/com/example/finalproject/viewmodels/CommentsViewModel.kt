@@ -12,18 +12,40 @@ import kotlinx.coroutines.launch
 class CommentsViewModel : ViewModel() {
 
     private val repository = CommentsRepository()
-    private val userRepository = UserRepository() // Add UserRepository for fetching user data
 
     private val _comments = MutableLiveData<List<Comment>>()
     val comments: LiveData<List<Comment>> get() = _comments
+
+    private val _userIdToNameMap = MutableLiveData<Map<String, String>>()
+    val userIdToNameMap: LiveData<Map<String, String>> get() = _userIdToNameMap
 
     private val _isEditing = MutableLiveData<Comment?>()
     val isEditing: LiveData<Comment?> get() = _isEditing
 
     fun fetchComments(recipeId: String) {
         viewModelScope.launch {
-            val fetchedComments = repository.fetchComments(recipeId)
-            _comments.postValue(fetchedComments)
+            try {
+                val fetchedComments = repository.fetchComments(recipeId)
+                _comments.postValue(fetchedComments)
+                fetchUserNames(fetchedComments)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
+    private suspend fun fetchUserNames(comments: List<Comment>) {
+        val userIds = comments.mapNotNull { it.userId }.distinct()
+        val userIdToName = mutableMapOf<String, String>()
+
+        try {
+            for (userId in userIds) {
+                val userName = repository.fetchUserNameById(userId)
+                userName?.let { userIdToName[userId] = it }
+            }
+            _userIdToNameMap.postValue(userIdToName)
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 
@@ -33,7 +55,7 @@ class CommentsViewModel : ViewModel() {
                 repository.addComment(recipeId, comment)
                 fetchComments(recipeId) // Refresh comments
             } catch (e: Exception) {
-                e.printStackTrace() // Handle error
+                e.printStackTrace()
             }
         }
     }
@@ -44,7 +66,7 @@ class CommentsViewModel : ViewModel() {
                 repository.updateComment(recipeId, commentId, updatedData)
                 fetchComments(recipeId) // Refresh comments
             } catch (e: Exception) {
-                e.printStackTrace() // Handle error
+                e.printStackTrace()
             }
         }
     }
@@ -55,7 +77,7 @@ class CommentsViewModel : ViewModel() {
                 repository.deleteComment(recipeId, commentId)
                 fetchComments(recipeId) // Refresh comments
             } catch (e: Exception) {
-                e.printStackTrace() // Handle error
+                e.printStackTrace()
             }
         }
     }
@@ -63,16 +85,5 @@ class CommentsViewModel : ViewModel() {
     fun setEditingComment(comment: Comment?) {
         _isEditing.value = comment
     }
-
-    // Add the getUserName function
-    fun getUserName(userId: String, callback: (String?) -> Unit) {
-        viewModelScope.launch {
-            try {
-                val userProfile = userRepository.getProfile() // Fetch user profile
-                callback(userProfile?.displayName) // Pass the display name to the callback
-            } catch (e: Exception) {
-                callback(null) // Pass null if an error occurs
-            }
-        }
-    }
 }
+

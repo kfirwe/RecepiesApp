@@ -65,39 +65,34 @@ class CommentsDialogFragment : DialogFragment() {
 
     private fun setupObservers() {
         viewModel.comments.observe(viewLifecycleOwner) { comments ->
-            recyclerView.adapter = CommentsAdapter(
-                comments = comments,
-                onEditComment = { comment ->
-                    if (isProfileView || comment.userId == FirebaseAuth.getInstance().currentUser?.uid) {
-                        viewModel.setEditingComment(comment)
-                        commentEditText.setText(comment.commentText)
-                        ratingBar.rating = comment.rating?.toFloat() ?: 0f
-                        showEditingState()
-                    } else {
-                        Toast.makeText(requireContext(), "You cannot edit this comment", Toast.LENGTH_SHORT).show()
-                    }
-                },
-                onDeleteComment = { comment ->
-                    if (isProfileView || comment.userId == FirebaseAuth.getInstance().currentUser?.uid) {
-                        viewModel.deleteComment(recipeId, comment.id)
-                        resetEditingState() // Reset editing state if the deleted comment was being edited
-                    } else {
-                        Toast.makeText(requireContext(), "You cannot delete this comment", Toast.LENGTH_SHORT).show()
-                    }
-                },
-                currentUserName = userName, // Pass the fetched user name
-                isProfileView = isProfileView
-            )
-        }
-
-        viewModel.isEditing.observe(viewLifecycleOwner) { editingComment ->
-            if (editingComment != null) {
-                showEditingState()
-            } else {
-                resetEditingState()
+            viewModel.userIdToNameMap.observe(viewLifecycleOwner) { userIdToNameMap ->
+                recyclerView.adapter = CommentsAdapter(
+                    comments = comments,
+                    onEditComment = { comment ->
+                        if (isProfileView || comment.userId == FirebaseAuth.getInstance().currentUser?.uid) {
+                            viewModel.setEditingComment(comment)
+                            commentEditText.setText(comment.commentText)
+                            ratingBar.rating = comment.rating?.toFloat() ?: 0f
+                            showEditingState()
+                        } else {
+                            Toast.makeText(requireContext(), "You cannot edit this comment", Toast.LENGTH_SHORT).show()
+                        }
+                    },
+                    onDeleteComment = { comment ->
+                        if (isProfileView || comment.userId == FirebaseAuth.getInstance().currentUser?.uid) {
+                            viewModel.deleteComment(recipeId, comment.id)
+                            resetEditingState() // Reset editing state if the deleted comment was being edited
+                        } else {
+                            Toast.makeText(requireContext(), "You cannot delete this comment", Toast.LENGTH_SHORT).show()
+                        }
+                    },
+                    userIdToNameMap = userIdToNameMap, // Pass the mapping
+                    isProfileView = isProfileView
+                )
             }
         }
     }
+
 
     private fun fetchCurrentUserName() {
         val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return

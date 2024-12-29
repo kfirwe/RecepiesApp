@@ -101,15 +101,7 @@
                     android:textSize="14sp"
                     android:layout_marginBottom="16dp" />
 
-                <!-- Password -->
-                <EditText
-                    android:id="@+id/etPassword"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="Password"
-                    android:textSize="14sp"
-                    android:layout_marginBottom="8dp"
-                    android:inputType="textPassword" />
+
 
                 <Button
                     android:id="@+id/btnUpdatePassword"

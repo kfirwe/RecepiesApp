@@ -16,8 +16,8 @@ class CommentsAdapter(
     private val comments: List<Comment>,
     private val onEditComment: (Comment) -> Unit,
     private val onDeleteComment: (Comment) -> Unit,
-    private val currentUserName: String?,
-    private val isProfileView: Boolean // New parameter
+    private val userIdToNameMap: Map<String, String>, // Map to fetch user names
+    private val isProfileView: Boolean // Profile view context
 ) : RecyclerView.Adapter<CommentsAdapter.CommentViewHolder>() {
 
     class CommentViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -36,14 +36,13 @@ class CommentsAdapter(
 
     override fun onBindViewHolder(holder: CommentViewHolder, position: Int) {
         val comment = comments[position]
-        holder.userNameTextView.text = comment.userName ?: "Unknown"
+        holder.userNameTextView.text = userIdToNameMap[comment.userId] ?: "Unknown User"
         holder.commentTextView.text = comment.commentText ?: ""
         holder.ratingBar.rating = comment.rating?.toFloat() ?: 0f
         holder.timestampTextView.text = comment.timestamp?.toDate().toString() ?: "Unknown"
 
         val isCurrentUserComment = comment.userId == FirebaseAuth.getInstance().currentUser?.uid
 
-        // Show/hide buttons based on ownership and view context
         if (isCurrentUserComment) {
             holder.editButton.visibility = View.VISIBLE
             holder.deleteButton.visibility = View.VISIBLE
@@ -55,7 +54,6 @@ class CommentsAdapter(
         holder.editButton.setOnClickListener { onEditComment(comment) }
         holder.deleteButton.setOnClickListener { onDeleteComment(comment) }
     }
-
 
     override fun getItemCount(): Int = comments.size
 }

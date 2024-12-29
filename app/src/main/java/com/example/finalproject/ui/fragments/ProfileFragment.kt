@@ -1,13 +1,16 @@
 package com.example.finalproject.ui.fragments
 
+import android.app.Activity
 import android.app.AlertDialog
 import android.content.Intent
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.util.Base64
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -20,9 +23,11 @@ import com.example.finalproject.databinding.FragmentProfileBinding
 import com.example.finalproject.ui.adapters.RecipeAdapterForProfile
 import com.example.finalproject.viewmodels.ProfileViewModel
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import java.io.ByteArrayOutputStream
 
 class ProfileFragment : Fragment() {
 
+    private val PICK_IMAGE_REQUEST_CODE = 101
     private lateinit var binding: FragmentProfileBinding
     private val viewModel: ProfileViewModel by viewModels()
     private lateinit var adapter: RecipeAdapterForProfile
@@ -77,6 +82,13 @@ class ProfileFragment : Fragment() {
             }
         }
 
+        viewModel.passwordChangeStatus.observe(viewLifecycleOwner) { isSuccess ->
+            if (isSuccess) {
+                Toast.makeText(context, "Password updated successfully!", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+
         viewModel.recipes.observe(viewLifecycleOwner) { recipes ->
             adapter.updateData(recipes)
         }
@@ -95,7 +107,7 @@ class ProfileFragment : Fragment() {
 
     private fun setupButtons() {
         binding.btnUpdateDisplayName.setOnClickListener {
-            val newName = binding.etDisplayName.text.toString()
+            val newName = binding.etDisplayName.text.toString().trim()
             if (newName.isNotEmpty()) {
                 viewModel.updateDisplayName(newName)
             } else {
@@ -103,19 +115,73 @@ class ProfileFragment : Fragment() {
             }
         }
 
+        binding.btnUpdatePassword.setOnClickListener {
+            showChangePasswordDialog()
+        }
+
+        binding.btnChangeProfilePicture.setOnClickListener {
+            val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+                type = "image/*"
+                addCategory(Intent.CATEGORY_OPENABLE)
+            }
+            startActivityForResult(intent, PICK_IMAGE_REQUEST_CODE)
+        }
+
+
         binding.btnUpdateBio.setOnClickListener {
-            val newBio = binding.etBio.text.toString()
+            val newBio = binding.etBio.text.toString().trim() // Get the bio input
             if (newBio.isNotEmpty()) {
-                // Handle bio update (extend if necessary)
+                viewModel.updateUserBio(newBio) // Call the ViewModel method to handle the update
             } else {
                 Toast.makeText(context, "Bio cannot be empty", Toast.LENGTH_SHORT).show()
             }
         }
 
+
         binding.btnLogout.setOnClickListener {
             // Handle logout and navigate to login screen
         }
     }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == PICK_IMAGE_REQUEST_CODE && resultCode == Activity.RESULT_OK && data != null) {
+            val imageUri = data.data ?: return
+
+            // Convert the image to Base64
+            val inputStream = requireContext().contentResolver.openInputStream(imageUri)
+            val bitmap = BitmapFactory.decodeStream(inputStream)
+            inputStream?.close()
+
+            val byteArrayOutputStream = ByteArrayOutputStream()
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream)
+            val imageBytes = byteArrayOutputStream.toByteArray()
+            val base64Image = Base64.encodeToString(imageBytes, Base64.DEFAULT)
+
+            // Update the profile picture through ViewModel
+            viewModel.updateProfilePicture(base64Image)
+        }
+    }
+
+    private fun showChangePasswordDialog() {
+        val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_change_password, null)
+        val editTextNewPassword: EditText = dialogView.findViewById(R.id.etNewPassword)
+
+        AlertDialog.Builder(requireContext())
+            .setTitle("Change Password")
+            .setView(dialogView)
+            .setPositiveButton("Change") { _, _ ->
+                val newPassword = editTextNewPassword.text.toString().trim()
+                if (newPassword.length >= 6) {
+                    viewModel.updatePassword(newPassword)
+                } else {
+                    Toast.makeText(context, "Password must be at least 6 characters long", Toast.LENGTH_SHORT).show()
+                }
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
 
     private fun setupBottomNavigation() {
         val bottomNavigationView = binding.bottomNavigation

@@ -11,6 +11,7 @@ import com.example.finalproject.data.models.UserProfile
 import com.example.finalproject.database.AppDatabase
 import com.example.finalproject.database.entities.UserImage
 import com.example.finalproject.utils.FirebaseUtils
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.tasks.await
@@ -25,9 +26,29 @@ class UserRepository {
         return FirebaseUtils.getUserProfile()
     }
 
-    suspend fun updateProfileName(newName: String): Boolean {
-        return FirebaseUtils.updateDisplayName(newName)
+    suspend fun updateProfileName(newName: String) {
+        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: throw Exception("User not logged in")
+        val updates = mapOf("name" to newName)
+
+        try {
+            firestore.collection("users").document(userId).update(updates).await() // Update Firestore
+        } catch (e: Exception) {
+            throw Exception("Failed to update display name: ${e.message}")
+        }
     }
+
+
+    suspend fun updateUserBio(newBio: String) {
+        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: throw Exception("User not logged in")
+        val bioUpdate = mapOf("bio" to newBio)
+
+        try {
+            firestore.collection("users").document(userId).update(bioUpdate).await()
+        } catch (e: Exception) {
+            throw Exception("Failed to update bio: ${e.message}")
+        }
+    }
+
 
     suspend fun saveUser(userId: String, name: String, email: String) {
         val user = hashMapOf(
@@ -42,6 +63,18 @@ class UserRepository {
             throw e
         }
     }
+
+    suspend fun updateProfilePicture(base64Image: String) {
+        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: throw Exception("User not logged in")
+        val updates = mapOf("profilePictureBase64" to base64Image)
+
+        try {
+            firestore.collection("users").document(userId).update(updates).await()
+        } catch (e: Exception) {
+            throw Exception("Failed to update profile picture: ${e.message}")
+        }
+    }
+
 
     suspend fun uploadDefaultProfilePicture(userId: String, context: Context) {
         val defaultImage = BitmapFactory.decodeResource(context.resources, R.drawable.default_user_profile)

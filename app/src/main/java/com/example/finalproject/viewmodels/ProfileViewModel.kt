@@ -8,9 +8,13 @@ import com.example.finalproject.data.models.Recipe
 import com.example.finalproject.data.models.UserProfile
 import com.example.finalproject.data.repositories.RecipeRepository
 import com.example.finalproject.data.repositories.UserRepository
+import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
 
 class ProfileViewModel : ViewModel() {
+
+    private val _passwordChangeStatus = MutableLiveData<Boolean>()
+    val passwordChangeStatus: LiveData<Boolean> get() = _passwordChangeStatus
 
     private val recipeRepository = RecipeRepository()
     private val userRepository = UserRepository()
@@ -41,6 +45,54 @@ class ProfileViewModel : ViewModel() {
         }
     }
 
+    fun updatePassword(newPassword: String) {
+        val user = FirebaseAuth.getInstance().currentUser
+        if (user != null) {
+            user.updatePassword(newPassword)
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        _passwordChangeStatus.value = true
+                    } else {
+                        _errorMessage.value = task.exception?.message
+                    }
+                }
+        } else {
+            _errorMessage.value = "User is not logged in."
+        }
+    }
+
+    fun updateProfilePicture(base64Image: String) {
+        _isLoading.value = true
+        viewModelScope.launch {
+            try {
+                userRepository.updateProfilePicture(base64Image)
+                fetchUserProfile() // Refresh the profile data
+                _errorMessage.value = "Profile picture updated successfully!"
+            } catch (e: Exception) {
+                _errorMessage.value = "Failed to update profile picture: ${e.message}"
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
+
+    fun updateUserBio(newBio: String) {
+        _isLoading.value = true
+        viewModelScope.launch {
+            try {
+                userRepository.updateUserBio(newBio) // Call the repository method to update the bio
+                fetchUserProfile() // Refresh the profile data
+                _errorMessage.value = "Bio updated successfully!"
+            } catch (e: Exception) {
+                _errorMessage.value = "Failed to update bio: ${e.message}"
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
+
     fun fetchUserRecipes() {
         _isLoading.value = true
         viewModelScope.launch {
@@ -55,15 +107,20 @@ class ProfileViewModel : ViewModel() {
     }
 
     fun updateDisplayName(newName: String) {
+        _isLoading.value = true
         viewModelScope.launch {
             try {
-                userRepository.updateProfileName(newName)
-                fetchUserProfile() // Refresh profile data
+                userRepository.updateProfileName(newName) // Calls the repository
+                fetchUserProfile() // Refresh the profile data
+                _errorMessage.value = "Display name updated successfully!"
             } catch (e: Exception) {
-                _errorMessage.value = e.message
+                _errorMessage.value = "Failed to update display name: ${e.message}"
+            } finally {
+                _isLoading.value = false
             }
         }
     }
+
 
     fun updateRecipe(recipeId: String, updatedData: Map<String, Any>) {
         viewModelScope.launch {
