@@ -26,7 +26,12 @@ class AuthRepository(private val context: Context) {
             }
             true
         } catch (e: Exception) {
-            throw e
+//            throw e
+            // Attempt offline login
+            withContext(Dispatchers.IO) {
+                val localUser = userDao.getUserByEmail(email)
+                localUser != null && localUser.password == password
+            }
         }
     }
 
