@@ -9,6 +9,8 @@ import android.content.Context
 import com.example.finalproject.R
 import com.example.finalproject.data.models.UserProfile
 import com.example.finalproject.database.AppDatabase
+import com.example.finalproject.database.dao.UserDao
+import com.example.finalproject.database.entities.UserEntity
 import com.example.finalproject.database.entities.UserImage
 import com.example.finalproject.utils.FirebaseUtils
 import com.google.firebase.auth.FirebaseAuth
@@ -18,9 +20,10 @@ import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
 
-class UserRepository {
+class UserRepository(private val userDao: UserDao) {
 
     private val firestore = FirebaseFirestore.getInstance()
+
 
     suspend fun getProfile(): UserProfile? {
         return FirebaseUtils.getUserProfile()
@@ -89,5 +92,13 @@ class UserRepository {
         } catch (e: Exception) {
             throw e
         }
+    }
+
+    suspend fun saveUserLocally(user: UserEntity) {
+        userDao.insertUser(user)
+    }
+
+    suspend fun getLocalUser(): UserEntity? {
+        return userDao.getUserById(FirebaseAuth.getInstance().currentUser?.uid ?: return null)
     }
 }

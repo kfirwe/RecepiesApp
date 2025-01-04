@@ -5,6 +5,8 @@ plugins {
     id("androidx.navigation.safeargs") version "2.8.5" apply false
 }
 
+
+
 tasks.register<Delete>("clean") {
     delete(rootProject.buildDir)
 }

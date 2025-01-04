@@ -13,23 +13,27 @@ import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.finalproject.R
 import com.example.finalproject.data.models.Recipe
+import com.example.finalproject.database.AppDatabase
+import com.example.finalproject.data.repositories.AuthRepository
 import com.example.finalproject.databinding.FragmentProfileBinding
 import com.example.finalproject.ui.adapters.RecipeAdapterForProfile
 import com.example.finalproject.viewmodels.ProfileViewModel
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.launch
 import java.io.ByteArrayOutputStream
 
 class ProfileFragment : Fragment() {
 
     private val PICK_IMAGE_REQUEST_CODE = 101
     private lateinit var binding: FragmentProfileBinding
-    private val viewModel: ProfileViewModel by viewModels()
+    private lateinit var viewModel: ProfileViewModel
     private lateinit var adapter: RecipeAdapterForProfile
     private lateinit var loadingDialog: AlertDialog
 
@@ -38,6 +42,8 @@ class ProfileFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentProfileBinding.inflate(inflater, container, false)
+
+        setupViewModel() // Initialize ViewModel with dependencies
         setupRecyclerView()
         setupObservers()
         setupButtons()
@@ -53,6 +59,13 @@ class ProfileFragment : Fragment() {
         viewModel.fetchUserRecipes()
 
         return binding.root
+    }
+
+    private fun setupViewModel() {
+        val appContext = requireContext().applicationContext
+        val userDao = AppDatabase.getDatabase(appContext).userDao()
+        val authRepository = AuthRepository(appContext) // Pass context if needed
+        viewModel = ProfileViewModel(authRepository, userDao)
     }
 
     private fun setupRecyclerView() {
@@ -87,7 +100,6 @@ class ProfileFragment : Fragment() {
                 Toast.makeText(context, "Password updated successfully!", Toast.LENGTH_SHORT).show()
             }
         }
-
 
         viewModel.recipes.observe(viewLifecycleOwner) { recipes ->
             adapter.updateData(recipes)
@@ -127,19 +139,19 @@ class ProfileFragment : Fragment() {
             startActivityForResult(intent, PICK_IMAGE_REQUEST_CODE)
         }
 
-
         binding.btnUpdateBio.setOnClickListener {
-            val newBio = binding.etBio.text.toString().trim() // Get the bio input
+            val newBio = binding.etBio.text.toString().trim()
             if (newBio.isNotEmpty()) {
-                viewModel.updateUserBio(newBio) // Call the ViewModel method to handle the update
+                viewModel.updateUserBio(newBio)
             } else {
                 Toast.makeText(context, "Bio cannot be empty", Toast.LENGTH_SHORT).show()
             }
         }
 
-
         binding.btnLogout.setOnClickListener {
-            // Handle logout and navigate to login screen
+            viewModel.logout()
+            FirebaseAuth.getInstance().signOut()
+            findNavController().navigate(R.id.loginFragment)
         }
     }
 
@@ -148,7 +160,6 @@ class ProfileFragment : Fragment() {
         if (requestCode == PICK_IMAGE_REQUEST_CODE && resultCode == Activity.RESULT_OK && data != null) {
             val imageUri = data.data ?: return
 
-            // Convert the image to Base64
             val inputStream = requireContext().contentResolver.openInputStream(imageUri)
             val bitmap = BitmapFactory.decodeStream(inputStream)
             inputStream?.close()
@@ -158,7 +169,6 @@ class ProfileFragment : Fragment() {
             val imageBytes = byteArrayOutputStream.toByteArray()
             val base64Image = Base64.encodeToString(imageBytes, Base64.DEFAULT)
 
-            // Update the profile picture through ViewModel
             viewModel.updateProfilePicture(base64Image)
         }
     }
@@ -182,7 +192,6 @@ class ProfileFragment : Fragment() {
             .show()
     }
 
-
     private fun setupBottomNavigation() {
         val bottomNavigationView = binding.bottomNavigation
         bottomNavigationView.selectedItemId = R.id.nav_profile
@@ -200,7 +209,7 @@ class ProfileFragment : Fragment() {
                     findNavController().navigate(R.id.addRecipeFragment)
                     true
                 }
-                R.id.nav_profile -> true // Already on Profile
+                R.id.nav_profile -> true
                 else -> false
             }
         }
@@ -223,14 +232,12 @@ class ProfileFragment : Fragment() {
                 updatedDescription: String,
                 updatedImageBase64: String?
             ) {
-                // Prepare updated data for the recipe
                 val updatedData = mutableMapOf<String, Any>(
                     "title" to updatedTitle,
                     "description" to updatedDescription
                 )
                 updatedImageBase64?.let { updatedData["imageBase64"] = it }
 
-                // Use the ViewModel to update the recipe
                 viewModel.updateRecipe(recipeId, updatedData)
             }
         })
@@ -242,11 +249,9 @@ class ProfileFragment : Fragment() {
         val dialog = CommentsDialogFragment().apply {
             arguments = Bundle().apply {
                 putString("recipeId", recipeId)
-                putBoolean("isProfileView", true) // Allow edit/delete for all comments
+                putBoolean("isProfileView", true)
             }
         }
         dialog.show(parentFragmentManager, "CommentsDialogFragment")
     }
-
-
 }

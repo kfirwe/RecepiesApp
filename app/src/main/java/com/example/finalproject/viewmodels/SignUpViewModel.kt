@@ -8,12 +8,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.finalproject.data.repositories.AuthRepository
 import com.example.finalproject.data.repositories.UserRepository
+import com.example.finalproject.database.dao.UserDao
 import kotlinx.coroutines.launch
 
-class SignUpViewModel : ViewModel() {
+class SignUpViewModel(private val authRepository: AuthRepository, private val userDao: UserDao) : ViewModel() {
 
-    private val authRepository = AuthRepository()
-    private val userRepository = UserRepository()
+    private val userRepository = UserRepository(userDao)
 
     private val _signUpStatus = MutableLiveData<Boolean>()
     val signUpStatus: LiveData<Boolean> get() = _signUpStatus
@@ -33,6 +33,11 @@ class SignUpViewModel : ViewModel() {
             }
         }
     }
+
+//    fun setContext(context: Context) {
+//        authRepository = AuthRepository(context)
+//        userRepository = UserRepository(context)
+//    }
 
 
     fun clearError() {

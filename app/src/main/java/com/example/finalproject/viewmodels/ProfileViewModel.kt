@@ -6,18 +6,20 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.finalproject.data.models.Recipe
 import com.example.finalproject.data.models.UserProfile
+import com.example.finalproject.data.repositories.AuthRepository
 import com.example.finalproject.data.repositories.RecipeRepository
 import com.example.finalproject.data.repositories.UserRepository
+import com.example.finalproject.database.dao.UserDao
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
 
-class ProfileViewModel : ViewModel() {
+class ProfileViewModel(private val authRepository: AuthRepository, private val userDao: UserDao) : ViewModel() {
 
     private val _passwordChangeStatus = MutableLiveData<Boolean>()
     val passwordChangeStatus: LiveData<Boolean> get() = _passwordChangeStatus
 
     private val recipeRepository = RecipeRepository()
-    private val userRepository = UserRepository()
+    private val userRepository = UserRepository(userDao)
 
     private val _recipes = MutableLiveData<List<Recipe>>()
     val recipes: LiveData<List<Recipe>> get() = _recipes
@@ -30,6 +32,7 @@ class ProfileViewModel : ViewModel() {
 
     private val _errorMessage = MutableLiveData<String?>()
     val errorMessage: LiveData<String?> get() = _errorMessage
+
 
     fun fetchUserProfile() {
         _isLoading.value = true
@@ -45,13 +48,32 @@ class ProfileViewModel : ViewModel() {
         }
     }
 
+    fun logout() {
+        viewModelScope.launch {
+            try {
+                authRepository.clearSavedUser()
+            } catch (e: Exception) {
+                _errorMessage.value = "Failed to clear saved user: ${e.message}"
+            }
+        }
+    }
+
+
     fun updatePassword(newPassword: String) {
         val user = FirebaseAuth.getInstance().currentUser
         if (user != null) {
             user.updatePassword(newPassword)
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
-                        _passwordChangeStatus.value = true
+                        viewModelScope.launch {
+                            try {
+                                // Update the password in the Room database
+                                authRepository.updateUserPassword(user.uid, newPassword)
+                                _passwordChangeStatus.postValue(true)
+                            } catch (e: Exception) {
+                                _errorMessage.postValue("Password updated in Firebase but failed locally: ${e.message}")
+                            }
+                        }
                     } else {
                         _errorMessage.value = task.exception?.message
                     }
@@ -60,6 +82,7 @@ class ProfileViewModel : ViewModel() {
             _errorMessage.value = "User is not logged in."
         }
     }
+
 
     fun updateProfilePicture(base64Image: String) {
         _isLoading.value = true
@@ -105,6 +128,13 @@ class ProfileViewModel : ViewModel() {
             }
         }
     }
+
+    fun clearSavedUser() {
+        viewModelScope.launch {
+            authRepository.clearSavedUser()
+        }
+    }
+
 
     fun updateDisplayName(newName: String) {
         _isLoading.value = true

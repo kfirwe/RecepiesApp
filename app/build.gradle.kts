@@ -26,6 +26,9 @@ android {
     }
 
     buildTypes {
+        debug {
+            resValue("string", "PORT_NUMBER", "8080") // Optional: Change the port if needed
+        }
         release {
             isMinifyEnabled = false
             proguardFiles(
@@ -45,7 +48,12 @@ android {
     }
 }
 
+
+
 dependencies {
+    debugImplementation("com.github.amitshekhariitbhu.Android-Debug-Database:debug-db:1.0.7")
+
+
     // Firebase BOM and dependencies
     implementation(platform("com.google.firebase:firebase-bom:32.1.1"))
     implementation("com.google.firebase:firebase-firestore")

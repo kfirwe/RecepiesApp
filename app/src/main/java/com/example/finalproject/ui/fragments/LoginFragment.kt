@@ -10,6 +10,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import com.example.finalproject.R
+import com.example.finalproject.data.repositories.AuthRepository
 import com.example.finalproject.databinding.FragmentLoginBinding
 import com.example.finalproject.viewmodels.LoginViewModel
 
@@ -17,7 +18,13 @@ class LoginFragment : Fragment() {
 
     private var _binding: FragmentLoginBinding? = null
     private val binding get() = _binding!!
-    private lateinit var viewModel: LoginViewModel
+
+    // Lazy initialization of the ViewModel with context
+    private val loginViewModel: LoginViewModel by lazy {
+        val context = requireContext().applicationContext
+        val authRepository = AuthRepository(context)
+        LoginViewModel(authRepository)
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -30,10 +37,10 @@ class LoginFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        viewModel = ViewModelProvider(this)[LoginViewModel::class.java]
+//        loginViewModel = ViewModelProvider(this)[LoginViewModel::class.java]
 
         // Observe login status
-        viewModel.loginStatus.observe(viewLifecycleOwner) { isSuccess ->
+        loginViewModel.loginStatus.observe(viewLifecycleOwner) { isSuccess ->
             if (isSuccess) {
                 Toast.makeText(context, "Login Successful!", Toast.LENGTH_SHORT).show()
                 findNavController().navigate(R.id.action_loginFragment_to_homeFragment)
@@ -41,10 +48,10 @@ class LoginFragment : Fragment() {
         }
 
         // Observe error messages
-        viewModel.errorMessage.observe(viewLifecycleOwner) { message ->
+        loginViewModel.errorMessage.observe(viewLifecycleOwner) { message ->
             message?.let {
                 Toast.makeText(context, it, Toast.LENGTH_LONG).show()
-                viewModel.clearError()
+                loginViewModel.clearError()
             }
         }
 
@@ -54,7 +61,7 @@ class LoginFragment : Fragment() {
             val password = binding.etPasswordLogin.text.toString().trim()
 
             if (email.isNotEmpty() && password.isNotEmpty()) {
-                viewModel.login(email, password)
+                loginViewModel.login(email, password)
             } else {
                 Toast.makeText(context, "Please fill out all fields", Toast.LENGTH_SHORT).show()
             }

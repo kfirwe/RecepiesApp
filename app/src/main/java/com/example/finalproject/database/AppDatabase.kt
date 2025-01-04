@@ -4,12 +4,13 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import com.example.finalproject.database.dao.UserImageDao
-import com.example.finalproject.database.entities.UserImage
+import com.example.finalproject.database.dao.UserDao
+import com.example.finalproject.database.entities.UserEntity
 
-@Database(entities = [UserImage::class], version = 1)
+@Database(entities = [UserEntity::class], version = 1, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
-    abstract fun userImageDao(): UserImageDao
+
+    abstract fun userDao(): UserDao
 
     companion object {
         @Volatile

@@ -1,7 +1,5 @@
 package com.example.finalproject.ui.fragments
 
-
-import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -11,14 +9,23 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import com.example.finalproject.R
+import com.example.finalproject.database.AppDatabase
 import com.example.finalproject.databinding.FragmentSignUpBinding
+import com.example.finalproject.data.repositories.AuthRepository
 import com.example.finalproject.viewmodels.SignUpViewModel
 
 class SignUpFragment : Fragment() {
 
     private var _binding: FragmentSignUpBinding? = null
     private val binding get() = _binding!!
-    private lateinit var viewModel: SignUpViewModel
+
+    // Initialize ViewModel with required dependencies
+    private val signUpViewModel: SignUpViewModel by lazy {
+        val context = requireContext().applicationContext
+        val userDao = AppDatabase.getDatabase(context).userDao()
+        val authRepository = AuthRepository(context)
+        SignUpViewModel(authRepository, userDao)
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -31,10 +38,8 @@ class SignUpFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        viewModel = ViewModelProvider(this)[SignUpViewModel::class.java]
-
         // Observe sign-up status
-        viewModel.signUpStatus.observe(viewLifecycleOwner) { isSuccess ->
+        signUpViewModel.signUpStatus.observe(viewLifecycleOwner) { isSuccess ->
             if (isSuccess) {
                 Toast.makeText(context, "Sign-Up Successful!", Toast.LENGTH_SHORT).show()
                 findNavController().navigate(R.id.action_signUpFragment_to_loginFragment)
@@ -42,10 +47,10 @@ class SignUpFragment : Fragment() {
         }
 
         // Observe error messages
-        viewModel.errorMessage.observe(viewLifecycleOwner) { errorMessage ->
+        signUpViewModel.errorMessage.observe(viewLifecycleOwner) { errorMessage ->
             errorMessage?.let {
                 Toast.makeText(context, it, Toast.LENGTH_LONG).show()
-                viewModel.clearError()
+                signUpViewModel.clearError()
             }
         }
 
@@ -56,12 +61,11 @@ class SignUpFragment : Fragment() {
             val name = binding.etNameSignUp.text.toString().trim()
 
             if (email.isNotEmpty() && password.isNotEmpty() && name.isNotEmpty()) {
-                viewModel.signUp(email, password, name, requireContext())
+                signUpViewModel.signUp(email, password, name, requireContext())
             } else {
                 Toast.makeText(context, "Please fill out all fields", Toast.LENGTH_SHORT).show()
             }
         }
-
 
         // Navigate to LoginFragment
         binding.tvLogin.setOnClickListener {
