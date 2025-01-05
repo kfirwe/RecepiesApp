@@ -1,23 +1,29 @@
 package com.example.finalproject.viewmodels
 
-
+import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.finalproject.data.models.Recipe
 import com.example.finalproject.data.repositories.RecipeRepository
+import com.example.finalproject.database.AppDatabase
 import kotlinx.coroutines.launch
 
-class SearchRecipeViewModel : ViewModel() {
+class SearchRecipeViewModel(context: Context) : ViewModel() {
 
-    private val repository = RecipeRepository()
+    private val repository: RecipeRepository
+
+    init {
+        val recipeDao = AppDatabase.getDatabase(context).recipeDao()
+        repository = RecipeRepository(recipeDao)
+    }
 
     private val _recipes = MutableLiveData<List<Recipe>>()
     val recipes: LiveData<List<Recipe>> get() = _recipes
 
-    private val _errorMessage = MutableLiveData<String>()
-    val errorMessage: LiveData<String> get() = _errorMessage
+    private val _errorMessage = MutableLiveData<String?>()
+    val errorMessage: LiveData<String?> get() = _errorMessage
 
     private val _isLoading = MutableLiveData<Boolean>()
     val isLoading: LiveData<Boolean> get() = _isLoading
@@ -45,5 +51,4 @@ class SearchRecipeViewModel : ViewModel() {
     fun clearError() {
         _errorMessage.value = null
     }
-
 }

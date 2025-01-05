@@ -24,7 +24,7 @@ class SearchRecipeFragment : Fragment() {
 
     private var _binding: FragmentSearchRecipeBinding? = null
     private val binding get() = _binding!!
-    private val viewModel: SearchRecipeViewModel by viewModels()
+    private lateinit var viewModel: SearchRecipeViewModel
 
     private lateinit var adapter: RecipeAdapter
 
@@ -38,6 +38,9 @@ class SearchRecipeFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        // Initialize ViewModel
+        viewModel = SearchRecipeViewModel(requireContext().applicationContext)
 
         setupRecyclerView()
         setupBottomNavigation()
@@ -95,9 +98,7 @@ class SearchRecipeFragment : Fragment() {
                 return@setOnClickListener
             }
 
-            lifecycleScope.launch {
-                viewModel.performSearch(query, searchBy, condition, limit)
-            }
+            viewModel.performSearch(query, searchBy, condition, limit)
         }
     }
 
@@ -128,11 +129,11 @@ class SearchRecipeFragment : Fragment() {
         dialog.show(parentFragmentManager, "CommentsDialogFragment")
     }
 
-
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
     }
 }
+
 
 

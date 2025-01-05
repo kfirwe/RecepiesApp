@@ -1,5 +1,6 @@
 package com.example.finalproject.viewmodels
 
+import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -9,17 +10,28 @@ import com.example.finalproject.data.models.UserProfile
 import com.example.finalproject.data.repositories.AuthRepository
 import com.example.finalproject.data.repositories.RecipeRepository
 import com.example.finalproject.data.repositories.UserRepository
-import com.example.finalproject.database.dao.UserDao
+import com.example.finalproject.database.AppDatabase
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
 
-class ProfileViewModel(private val authRepository: AuthRepository, private val userDao: UserDao) : ViewModel() {
+class ProfileViewModel(
+    private val context: Context,
+    private val authRepository: AuthRepository
+) : ViewModel() {
+
+    private val recipeRepository: RecipeRepository
+    private val userRepository: UserRepository
+
+    init {
+        val database = AppDatabase.getDatabase(context)
+        val recipeDao = database.recipeDao()
+        val userDao = database.userDao()
+        recipeRepository = RecipeRepository(recipeDao)
+        userRepository = UserRepository(userDao)
+    }
 
     private val _passwordChangeStatus = MutableLiveData<Boolean>()
     val passwordChangeStatus: LiveData<Boolean> get() = _passwordChangeStatus
-
-    private val recipeRepository = RecipeRepository()
-    private val userRepository = UserRepository(userDao)
 
     private val _recipes = MutableLiveData<List<Recipe>>()
     val recipes: LiveData<List<Recipe>> get() = _recipes
@@ -32,7 +44,6 @@ class ProfileViewModel(private val authRepository: AuthRepository, private val u
 
     private val _errorMessage = MutableLiveData<String?>()
     val errorMessage: LiveData<String?> get() = _errorMessage
-
 
     fun fetchUserProfile() {
         _isLoading.value = true
@@ -58,7 +69,6 @@ class ProfileViewModel(private val authRepository: AuthRepository, private val u
         }
     }
 
-
     fun updatePassword(newPassword: String) {
         val user = FirebaseAuth.getInstance().currentUser
         if (user != null) {
@@ -67,7 +77,6 @@ class ProfileViewModel(private val authRepository: AuthRepository, private val u
                     if (task.isSuccessful) {
                         viewModelScope.launch {
                             try {
-                                // Update the password in the Room database
                                 authRepository.updateUserPassword(user.uid, newPassword)
                                 _passwordChangeStatus.postValue(true)
                             } catch (e: Exception) {
@@ -83,13 +92,12 @@ class ProfileViewModel(private val authRepository: AuthRepository, private val u
         }
     }
 
-
     fun updateProfilePicture(base64Image: String) {
         _isLoading.value = true
         viewModelScope.launch {
             try {
                 userRepository.updateProfilePicture(base64Image)
-                fetchUserProfile() // Refresh the profile data
+                fetchUserProfile()
                 _errorMessage.value = "Profile picture updated successfully!"
             } catch (e: Exception) {
                 _errorMessage.value = "Failed to update profile picture: ${e.message}"
@@ -99,13 +107,12 @@ class ProfileViewModel(private val authRepository: AuthRepository, private val u
         }
     }
 
-
     fun updateUserBio(newBio: String) {
         _isLoading.value = true
         viewModelScope.launch {
             try {
-                userRepository.updateUserBio(newBio) // Call the repository method to update the bio
-                fetchUserProfile() // Refresh the profile data
+                userRepository.updateUserBio(newBio)
+                fetchUserProfile()
                 _errorMessage.value = "Bio updated successfully!"
             } catch (e: Exception) {
                 _errorMessage.value = "Failed to update bio: ${e.message}"
@@ -114,7 +121,6 @@ class ProfileViewModel(private val authRepository: AuthRepository, private val u
             }
         }
     }
-
 
     fun fetchUserRecipes() {
         _isLoading.value = true
@@ -129,19 +135,12 @@ class ProfileViewModel(private val authRepository: AuthRepository, private val u
         }
     }
 
-    fun clearSavedUser() {
-        viewModelScope.launch {
-            authRepository.clearSavedUser()
-        }
-    }
-
-
     fun updateDisplayName(newName: String) {
         _isLoading.value = true
         viewModelScope.launch {
             try {
-                userRepository.updateProfileName(newName) // Calls the repository
-                fetchUserProfile() // Refresh the profile data
+                userRepository.updateProfileName(newName)
+                fetchUserProfile()
                 _errorMessage.value = "Display name updated successfully!"
             } catch (e: Exception) {
                 _errorMessage.value = "Failed to update display name: ${e.message}"
@@ -150,7 +149,6 @@ class ProfileViewModel(private val authRepository: AuthRepository, private val u
             }
         }
     }
-
 
     fun updateRecipe(recipeId: String, updatedData: Map<String, Any>) {
         viewModelScope.launch {

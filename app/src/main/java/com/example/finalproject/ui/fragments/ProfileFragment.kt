@@ -64,9 +64,10 @@ class ProfileFragment : Fragment() {
     private fun setupViewModel() {
         val appContext = requireContext().applicationContext
         val userDao = AppDatabase.getDatabase(appContext).userDao()
-        val authRepository = AuthRepository(appContext) // Pass context if needed
-        viewModel = ProfileViewModel(authRepository, userDao)
+        val authRepository = AuthRepository(appContext)
+        viewModel = ProfileViewModel(appContext, authRepository)
     }
+
 
     private fun setupRecyclerView() {
         binding.recyclerViewUploadedRecipes.layoutManager = LinearLayoutManager(context)

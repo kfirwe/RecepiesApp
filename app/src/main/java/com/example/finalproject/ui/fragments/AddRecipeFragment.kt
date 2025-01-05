@@ -54,7 +54,8 @@ class AddRecipeFragment : Fragment() {
 
         setupBottomNavigation(view)
 
-        viewModel = ViewModelProvider(this)[AddRecipeViewModel::class.java]
+        // Initialize ViewModel
+        viewModel = AddRecipeViewModel(requireContext().applicationContext)
 
         selectImageButton.setOnClickListener {
             imagePickerLauncher.launch("image/*")

@@ -53,6 +53,8 @@ android {
 dependencies {
     debugImplementation("com.github.amitshekhariitbhu.Android-Debug-Database:debug-db:1.0.7")
 
+    // Specific Google Play services dependency
+    implementation("com.google.android.gms:play-services-basement:18.1.0")
 
     // Firebase BOM and dependencies
     implementation(platform("com.google.firebase:firebase-bom:32.1.1"))
@@ -90,6 +92,7 @@ dependencies {
     implementation("androidx.navigation:navigation-fragment-ktx:2.8.5")
     implementation("androidx.navigation:navigation-ui-ktx:2.8.5")
 }
+
 
 kapt {
     correctErrorTypes = true

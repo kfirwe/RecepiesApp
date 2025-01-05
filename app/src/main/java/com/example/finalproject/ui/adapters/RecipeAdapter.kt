@@ -25,10 +25,13 @@ class RecipeAdapter(
             title.text = recipe.title
             description.text = recipe.description
 
+            // Load image if available
             recipe.imageBase64?.let {
                 val imageBytes = Base64.decode(it, Base64.DEFAULT)
                 val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
                 image.setImageBitmap(bitmap)
+            } ?: run {
+                image.setImageResource(R.drawable.ic_placeholder_image) // Default image resource
             }
 
             itemView.setOnClickListener {

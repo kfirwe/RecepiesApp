@@ -7,10 +7,13 @@ import androidx.room.RoomDatabase
 import com.example.finalproject.database.dao.UserDao
 import com.example.finalproject.database.entities.UserEntity
 
-@Database(entities = [UserEntity::class], version = 1, exportSchema = false)
-abstract class AppDatabase : RoomDatabase() {
+import com.example.finalproject.database.dao.RecipeDao
+import com.example.finalproject.database.entities.RecipeEntity
 
+@Database(entities = [UserEntity::class, RecipeEntity::class], version = 2, exportSchema = false)
+abstract class AppDatabase : RoomDatabase() {
     abstract fun userDao(): UserDao
+    abstract fun recipeDao(): RecipeDao
 
     companion object {
         @Volatile
@@ -22,12 +25,15 @@ abstract class AppDatabase : RoomDatabase() {
                     context.applicationContext,
                     AppDatabase::class.java,
                     "app_database"
-                ).build()
+                )
+                    .fallbackToDestructiveMigration() // Delete and recreate DB on schema changes
+                    .build()
                 INSTANCE = instance
                 instance
             }
         }
     }
 }
+
 
 
