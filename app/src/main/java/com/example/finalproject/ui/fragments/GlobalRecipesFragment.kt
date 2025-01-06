@@ -47,8 +47,30 @@ class GlobalRecipesFragment : Fragment() {
         // Fetch initial recipes
         viewModel.fetchRecipes()
 
+        // Add scroll listener for infinite scrolling
+        setupScrollListener()
+
         return view
     }
+
+    private fun setupScrollListener() {
+        recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                super.onScrolled(recyclerView, dx, dy)
+                val layoutManager = recyclerView.layoutManager as LinearLayoutManager
+                val visibleItemCount = layoutManager.childCount
+                val totalItemCount = layoutManager.itemCount
+                val firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition()
+
+                if ((visibleItemCount + firstVisibleItemPosition) >= totalItemCount &&
+                    firstVisibleItemPosition >= 0) {
+                    // Fetch the next batch of recipes
+                    viewModel.fetchRecipes()
+                }
+            }
+        })
+    }
+
 
     private fun showRecipeDialog(recipe: GlobalRecipe) {
         val dialog = Dialog(requireContext())

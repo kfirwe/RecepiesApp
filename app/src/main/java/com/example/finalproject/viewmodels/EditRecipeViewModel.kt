@@ -25,6 +25,7 @@ class EditRecipeViewModel(context: Context) : ViewModel() {
                 repository.updateRecipe(recipeId, updatedData)
                 result.value = true
             } catch (e: Exception) {
+                e.printStackTrace()
                 result.value = false
             }
         }

@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -14,9 +15,7 @@ import com.example.finalproject.R
 import com.example.finalproject.data.models.Recipe
 import com.example.finalproject.data.repositories.RecipeRepository
 import com.example.finalproject.database.AppDatabase
-import com.example.finalproject.database.entities.RecipeEntity
 import com.example.finalproject.ui.adapters.RecipeAdapter
-//import com.example.finalproject.utils.toRecipe
 import com.example.finalproject.viewmodels.UserRecipesViewModel
 
 class UserRecipesFragment : Fragment() {
@@ -24,6 +23,8 @@ class UserRecipesFragment : Fragment() {
     private lateinit var viewModel: UserRecipesViewModel
     private lateinit var adapter: RecipeAdapter
     private val recipes = mutableListOf<Recipe>()
+
+    private lateinit var loadingDialog: AlertDialog
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -55,19 +56,35 @@ class UserRecipesFragment : Fragment() {
         val dividerItemDecoration = DividerItemDecoration(context, LinearLayoutManager.VERTICAL)
         recyclerView.addItemDecoration(dividerItemDecoration)
 
+        // Initialize loading dialog
+        loadingDialog = AlertDialog.Builder(requireContext())
+            .setView(R.layout.loading_spinner)
+            .setCancelable(false)
+            .create()
+
         setupObservers()
 
         recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            private var lastScrollDirection = 0 // Track scroll direction (1 = down, -1 = up)
+
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
                 val layoutManager = recyclerView.layoutManager as LinearLayoutManager
                 val lastVisibleItem = layoutManager.findLastVisibleItemPosition()
 
-                if (lastVisibleItem == recipes.size - 1) {
+                // Detect scroll direction
+                val currentScrollDirection = if (dy > 0) 1 else if (dy < 0) -1 else 0
+
+                // Load more recipes only when scrolling down
+                if (currentScrollDirection == 1 && lastVisibleItem == recipes.size - 1) {
                     viewModel.loadRecipes()
                 }
+
+                // Update last scroll direction
+                lastScrollDirection = currentScrollDirection
             }
         })
+
 
         // Load initial recipes
         viewModel.loadRecipes()
@@ -81,12 +98,8 @@ class UserRecipesFragment : Fragment() {
             adapter.notifyDataSetChanged() // Notify adapter of data changes
         }
 
-
-
-
-
         viewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
-            // Show or hide a loading spinner if needed
+            if (isLoading) loadingDialog.show() else loadingDialog.dismiss()
         }
 
         viewModel.errorMessage.observe(viewLifecycleOwner) { errorMessage ->
@@ -105,15 +118,4 @@ class UserRecipesFragment : Fragment() {
         }
         dialog.show(parentFragmentManager, "CommentsDialogFragment")
     }
-
-//    private fun RecipeEntity.toRecipe(): Recipe {
-//        return Recipe(
-//            id = id,
-//            userId = userId,
-//            title = title,
-//            description = description,
-//            imageBase64 = null // Default to null; you can adjust this if needed
-//        )
-//    }
-
 }

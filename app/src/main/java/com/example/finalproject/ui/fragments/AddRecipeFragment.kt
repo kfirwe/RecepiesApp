@@ -93,6 +93,32 @@ class AddRecipeFragment : Fragment() {
         }
     }
 
+//    private fun uploadRecipe() {
+//        val title = titleEditText.text.toString().trim()
+//        val description = descriptionEditText.text.toString().trim()
+//
+//        if (title.isEmpty() || description.isEmpty() || selectedImageUri == null) {
+//            Toast.makeText(context, "Please fill all fields and select an image", Toast.LENGTH_SHORT).show()
+//            return
+//        }
+//
+//        try {
+//            val inputStream = requireContext().contentResolver.openInputStream(selectedImageUri!!)
+//            val bitmap = BitmapFactory.decodeStream(inputStream)
+//            inputStream?.close()
+//
+//            val byteArrayOutputStream = ByteArrayOutputStream()
+//            bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream)
+//            val imageBytes = byteArrayOutputStream.toByteArray()
+//            val base64Image = android.util.Base64.encodeToString(imageBytes, android.util.Base64.DEFAULT)
+//
+//            viewModel.uploadRecipe(title, description, base64Image)
+//        } catch (e: Exception) {
+//            e.printStackTrace()
+//            Toast.makeText(context, "Failed to process image.", Toast.LENGTH_SHORT).show()
+//        }
+//    }
+
     private fun uploadRecipe() {
         val title = titleEditText.text.toString().trim()
         val description = descriptionEditText.text.toString().trim()
@@ -104,13 +130,19 @@ class AddRecipeFragment : Fragment() {
 
         try {
             val inputStream = requireContext().contentResolver.openInputStream(selectedImageUri!!)
-            val bitmap = BitmapFactory.decodeStream(inputStream)
+            val originalBitmap = BitmapFactory.decodeStream(inputStream)
             inputStream?.close()
 
+            // Compress the image
+            val compressedBitmap = compressBitmap(originalBitmap, maxFileSizeInKB = 1024)
+
+            // Convert the compressed image to Base64
             val byteArrayOutputStream = ByteArrayOutputStream()
-            bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream)
+            compressedBitmap.compress(Bitmap.CompressFormat.JPEG, 80, byteArrayOutputStream) // Adjust quality if needed
             val imageBytes = byteArrayOutputStream.toByteArray()
             val base64Image = android.util.Base64.encodeToString(imageBytes, android.util.Base64.DEFAULT)
+
+            println("Compressed image size: ${imageBytes.size / 1024} KB") // Log for debugging
 
             viewModel.uploadRecipe(title, description, base64Image)
         } catch (e: Exception) {
@@ -118,6 +150,24 @@ class AddRecipeFragment : Fragment() {
             Toast.makeText(context, "Failed to process image.", Toast.LENGTH_SHORT).show()
         }
     }
+
+    private fun compressBitmap(original: Bitmap, maxFileSizeInKB: Int): Bitmap {
+        var quality = 100
+        var byteArrayOutputStream = ByteArrayOutputStream()
+
+        // Compress the image in a loop, reducing quality until it meets the size requirement
+        original.compress(Bitmap.CompressFormat.JPEG, quality, byteArrayOutputStream)
+        while (byteArrayOutputStream.toByteArray().size / 1024 > maxFileSizeInKB && quality > 10) {
+            quality -= 10
+            byteArrayOutputStream = ByteArrayOutputStream()
+            original.compress(Bitmap.CompressFormat.JPEG, quality, byteArrayOutputStream)
+        }
+
+        val byteArray = byteArrayOutputStream.toByteArray()
+        return BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
+    }
+
+
 
     private fun observeViewModel() {
         viewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->

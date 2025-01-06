@@ -172,11 +172,18 @@ class RecipeRepository(private val recipeDao: RecipeDao) {
 
     suspend fun updateRecipe(recipeId: String, updatedData: Map<String, Any>) {
         try {
-            firestore.collection("recipes").document(recipeId).update(updatedData).await()
+            println("Updating recipe: $recipeId with data: $updatedData") // Log the data being updated
+            firestore.collection("recipes")
+                .document(recipeId)
+                .update(updatedData)
+                .await()
+            println("Recipe updated successfully in Firestore.")
         } catch (e: Exception) {
+            println("Failed to update recipe: ${e.message}")
             throw e
         }
     }
+
 
     suspend fun addRecipe(title: String, description: String, imageBase64: String) {
         val recipeId = UUID.randomUUID().toString()
