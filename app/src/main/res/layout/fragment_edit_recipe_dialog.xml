@@ -1,37 +1,43 @@
-<LinearLayout
+<android.widget.ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:padding="16dp">
+    android:layout_height="wrap_content">
 
-    <EditText
-        android:id="@+id/etEditTitle"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Title" />
+        android:orientation="vertical"
+        android:padding="16dp">
 
-    <EditText
-        android:id="@+id/etEditDescription"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Description" />
+        <EditText
+            android:id="@+id/etEditTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Title" />
 
-    <Button
-        android:id="@+id/btnSelectImage"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Select Image" />
+        <EditText
+            android:id="@+id/etEditDescription"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Description" />
 
-    <ImageView
-        android:id="@+id/ivSelectedImage"
-        android:layout_width="match_parent"
-        android:layout_height="200dp"
-        android:scaleType="centerCrop" />
+        <Button
+            android:id="@+id/btnSelectImage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Select Image" />
 
-    <Button
-        android:id="@+id/btnUpdateRecipe"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Update Recipe" />
-</LinearLayout>
+        <ImageView
+            android:id="@+id/ivSelectedImage"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:scaleType="centerCrop" />
+
+        <Button
+            android:id="@+id/btnUpdateRecipe"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Update Recipe" />
+    </LinearLayout>
+
+</android.widget.ScrollView>
